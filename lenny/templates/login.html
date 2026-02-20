@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Login — {{ library }}{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="auth-card">
+        <div class="auth-banner">
+            Simulated OAuth Login
+        </div>
+        <h2>{{ library }}</h2>
+        <p class="auth-description">
+            Sign in with your library credentials to access
+            BRIET Digital Lending.
+        </p>
+
+        <form method="POST" action="/oauth/authorize">
+            <input type="hidden" name="library" value="{{ library }}">
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="patron@example.com"
+                    required
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="card_number">Library Card Number</label>
+                <input
+                    type="text"
+                    id="card_number"
+                    name="card_number"
+                    placeholder="Any value for demo"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">
+                Sign In
+            </button>
+        </form>
+
+        <p class="auth-note">
+            This is a demo — any email and card number will be accepted.
+            In production, this page would be hosted by the partner library
+            and would validate real patron credentials.
+        </p>
+    </div>
+</section>
+{% endblock %}

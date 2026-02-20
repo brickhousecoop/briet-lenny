@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}My Shelf — BRIET Digital Lending{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <h1>My Shelf</h1>
+    <p class="page-description">
+        Books you currently have on loan.
+    </p>
+
+    {% if books %}
+    <div class="book-grid">
+        {% for book in books %}
+        <div class="book-card">
+            <div class="book-cover">
+                <span class="format-badge">{{ book.format }}</span>
+            </div>
+            <div class="book-info">
+                <h3>{{ book.title }}</h3>
+                <p class="book-author">{{ book.author }}</p>
+                <div class="book-actions">
+                    <a href="/catalog/{{ book.id }}/read" class="btn btn-primary">
+                        Read
+                    </a>
+                    <form method="POST" action="/catalog/{{ book.id }}/return" style="display:inline">
+                        <button type="submit" class="btn btn-outline">Return</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>Your shelf is empty.</p>
+        <a href="/catalog" class="btn btn-primary">Browse Catalog</a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

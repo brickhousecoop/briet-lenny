@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}BRIET Digital Lending — Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to BRIET Digital Lending</h1>
+    <p class="subtitle">
+        A free, open source platform for libraries to lend digital books
+        to their patrons — securely and seamlessly.
+    </p>
+
+    {% if session %}
+        <p class="greeting">
+            Welcome back, <strong>{{ session.email }}</strong>
+            (via {{ session.library }})
+        </p>
+        <div class="hero-actions">
+            <a href="/catalog" class="btn btn-primary">Browse Catalog</a>
+            <a href="/shelf" class="btn btn-outline">My Shelf</a>
+        </div>
+    {% else %}
+        <div class="hero-actions">
+            <a href="/oauth/authorize?library=Partner+Library" class="btn btn-primary">
+                Login via Partner Library
+            </a>
+        </div>
+    {% endif %}
+</section>
+
+<section class="features">
+    <div class="feature-card">
+        <h3>Authenticate</h3>
+        <p>
+            Patrons log in through their home library's credentials.
+            The lending platform verifies identity via OAuth.
+        </p>
+    </div>
+    <div class="feature-card">
+        <h3>Browse &amp; Borrow</h3>
+        <p>
+            Discover available titles in the catalog and borrow them
+            instantly with a single click.
+        </p>
+    </div>
+    <div class="feature-card">
+        <h3>Read &amp; Return</h3>
+        <p>
+            Read borrowed books directly in the browser.
+            Return them when finished so others can borrow.
+        </p>
+    </div>
+</section>
+
+<section class="info-box">
+    <h2>About This Demo</h2>
+    <p>
+        This is a demonstration deployment of
+        <a href="https://github.com/ArchiveLabs/lenny" target="_blank" rel="noopener">Lenny</a>,
+        an open source lending system by Archive Labs. It simulates
+        the OAuth login flow that a partner library would use to
+        authenticate their patrons for ebook lending.
+    </p>
+    <p>
+        In production, the "Login via Partner Library" button would
+        redirect to the partner library's real authentication system.
+        For this demo, any credentials are accepted.
+    </p>
+</section>
+{% endblock %}
