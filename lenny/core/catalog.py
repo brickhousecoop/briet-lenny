@@ -1,25 +1,33 @@
 """Book catalog for the BRIET lending demo.
 
-Reads from catalog.json at the project root. The admin form writes
-back to the same file so changes persist across deploys.
+Reads seed data from catalog.json at the project root.  Writes go to
+/tmp/catalog.json so admin edits work on Vercel (where the deployed
+code directory is read-only).  The /tmp copy is preferred for reads
+once it exists; data there survives across warm invocations but is
+lost on cold starts.
 """
 
 import json
 from pathlib import Path
 
-CATALOG_PATH = Path(__file__).resolve().parent.parent.parent / "catalog.json"
+# Deployed seed file (read-only on Vercel)
+_CATALOG_SRC = Path(__file__).resolve().parent.parent.parent / "catalog.json"
+# Writable copy used at runtime
+_CATALOG_TMP = Path("/tmp/catalog.json")
 
 
 def _load() -> list[dict]:
-    """Read catalog from JSON file."""
-    if CATALOG_PATH.exists():
-        return json.loads(CATALOG_PATH.read_text())
+    """Read catalog, preferring the /tmp copy when available."""
+    if _CATALOG_TMP.exists():
+        return json.loads(_CATALOG_TMP.read_text())
+    if _CATALOG_SRC.exists():
+        return json.loads(_CATALOG_SRC.read_text())
     return []
 
 
 def _save(catalog: list[dict]) -> None:
-    """Write catalog back to JSON file."""
-    CATALOG_PATH.write_text(json.dumps(catalog, indent=2) + "\n")
+    """Write catalog to /tmp (always writable, even on Vercel)."""
+    _CATALOG_TMP.write_text(json.dumps(catalog, indent=2) + "\n")
 
 
 def get_catalog() -> list[dict]:
