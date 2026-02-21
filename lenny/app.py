@@ -33,9 +33,4 @@ static_dir = BASE_DIR / "public" / "static"
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
-# Serve cover images from covers/
-covers_dir = BASE_DIR / "covers"
-if covers_dir.exists():
-    app.mount("/covers", StaticFiles(directory=str(covers_dir)), name="covers")
-
 app.include_router(router)

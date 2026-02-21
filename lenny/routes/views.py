@@ -4,7 +4,7 @@ Implements: landing page, simulated OAuth, catalog browsing,
 borrowing/returning, PDF reading, and user bookshelf.
 """
 
-import os
+import base64
 from pathlib import Path
 from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -21,7 +21,8 @@ from lenny.core.catalog import get_catalog, get_book, update_book
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 TEMPLATES_DIR = BASE_DIR / "lenny" / "templates"
 BOOKS_DIR = BASE_DIR / "books"
-COVERS_DIR = BASE_DIR / "covers"
+
+MAX_COVER_BYTES = 2 * 1024 * 1024  # 2 MB
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -236,6 +237,17 @@ async def admin_page(request: Request, saved: bool = False):
     })
 
 
+@router.get("/covers/{book_id}")
+async def serve_cover(book_id: str):
+    """Serve a cover image stored as base64 in catalog.json."""
+    book = get_book(book_id)
+    if not book or not book.get("cover_data"):
+        raise HTTPException(status_code=404, detail="No cover image")
+    data = base64.b64decode(book["cover_data"])
+    content_type = book.get("cover_type", "image/jpeg")
+    return Response(content=data, media_type=content_type)
+
+
 @router.post("/admin/catalog/{book_id}")
 async def admin_update_book(
     request: Request,
@@ -248,29 +260,27 @@ async def admin_update_book(
     cover_file: UploadFile | None = File(None),
 ):
     """Save metadata edits and optional cover image upload."""
-    # Determine cover filename — upload new file or keep existing
-    cover_filename = ""
-    if cover_file and cover_file.filename and cover_file.size:
-        # Sanitize: use book_id + original extension
-        ext = Path(cover_file.filename).suffix.lower() or ".jpg"
-        cover_filename = f"{book_id}{ext}"
-        COVERS_DIR.mkdir(exist_ok=True)
-        dest = COVERS_DIR / cover_filename
-        dest.write_bytes(await cover_file.read())
-    else:
-        # Keep existing cover value
-        existing = get_book(book_id)
-        if existing:
-            cover_filename = existing.get("cover", "")
-
-    update_book(book_id, {
+    updates = {
         "title": title,
         "author": author,
         "publisher": publisher,
         "year": year,
         "description": description,
-        "cover": cover_filename,
-    })
+    }
+
+    # If a new cover was uploaded, base64-encode and store in catalog
+    if cover_file and cover_file.filename:
+        content = await cover_file.read()
+        if content:
+            if len(content) > MAX_COVER_BYTES:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cover image must be under 2 MB.",
+                )
+            updates["cover_data"] = base64.b64encode(content).decode("ascii")
+            updates["cover_type"] = cover_file.content_type or "image/jpeg"
+
+    update_book(book_id, updates)
     return RedirectResponse(url="/admin?saved=1", status_code=303)
 
 

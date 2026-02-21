@@ -49,14 +49,13 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Cover Image</label>
-                    {% if book.cover %}
+                    {% if book.cover_data %}
                     <div class="cover-preview">
-                        <img src="/covers/{{ book.cover }}" alt="Current cover">
-                        <span class="cover-filename">{{ book.cover }}</span>
+                        <img src="/covers/{{ book.id }}" alt="Current cover">
                     </div>
                     {% endif %}
                     <label for="cover_file-{{ book.id }}" class="file-upload-label">
-                        <span class="file-upload-btn btn btn-outline btn-small">{{ "Replace image…" if book.cover else "Upload JPG…" }}</span>
+                        <span class="file-upload-btn btn btn-outline btn-small">{{ "Replace image…" if book.cover_data else "Upload JPG…" }}</span>
                         <input type="file" id="cover_file-{{ book.id }}" name="cover_file" accept="image/jpeg,image/png,image/webp" class="file-upload-input">
                     </label>
                     <span class="file-upload-name" id="filename-{{ book.id }}"></span>

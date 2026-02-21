@@ -12,9 +12,9 @@
     <div class="book-grid">
         {% for book in books %}
         <div class="book-card">
-            <div class="book-cover{% if book.cover %} book-cover--img{% endif %}">
-                {% if book.cover %}
-                <img src="/covers/{{ book.cover }}" alt="{{ book.title }} cover">
+            <div class="book-cover{% if book.cover_data %} book-cover--img{% endif %}">
+                {% if book.cover_data %}
+                <img src="/covers/{{ book.id }}" alt="{{ book.title }} cover">
                 {% endif %}
                 <span class="format-badge">{{ book.format }}</span>
             </div>
