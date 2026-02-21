@@ -217,7 +217,11 @@ async def download_book(request: Request, book_id: str):
     return Response(
         content=data,
         media_type="application/pdf",
-        headers={"Content-Disposition": "inline"},
+        headers={
+            "Content-Disposition": "inline",
+            "Cache-Control": "no-store",
+            "X-Content-Type-Options": "nosniff",
+        },
     )
 
 
