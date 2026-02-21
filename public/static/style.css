@@ -7,9 +7,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --color-primary: #1B4332;
-    --color-primary-light: #2D6A4F;
-    --color-accent: #40916C;
+    --color-primary: #C50025;
+    --color-primary-light: #E03050;
+    --color-accent: #FF002B;
     --color-bg: #FAFAF8;
     --color-surface: #FFFFFF;
     --color-text: #1A1A1A;
@@ -265,7 +265,7 @@ footer a { color: var(--color-primary-light); }
 .form-group input:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.1);
+    box-shadow: 0 0 0 3px rgba(197, 0, 37, 0.1);
 }
 
 .auth-note {
@@ -445,7 +445,7 @@ footer a { color: var(--color-primary-light); }
 .admin-form textarea:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.1);
+    box-shadow: 0 0 0 3px rgba(197, 0, 37, 0.1);
 }
 .cover-preview {
     display: flex;
