@@ -7,16 +7,16 @@ For the demo, it's a simple in-memory list.
 CATALOG = [
     {
         "id": "demo-book-1",
-        "title": "Sample eBook",
-        "author": "Partner Library Collection",
+        "title": "Cooking with Curiosity (BRIET Edition)",
+        "author": "BRIET Collection",
         "description": (
-            "This is a demonstration eBook available for lending through "
+            "A demonstration title available for lending through "
             "the BRIET Digital Lending platform. Partner library patrons "
             "can borrow this title after authenticating with their library credentials."
         ),
         "format": "PDF",
         "total_copies": 3,
-        "filename": "demo.pdf",
+        "filename": "Cooking with Curiosity (BRIET Edition) Interior.pdf",
     },
 ]
 
