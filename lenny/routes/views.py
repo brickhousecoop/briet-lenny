@@ -6,7 +6,7 @@ borrowing/returning, PDF reading, and user bookshelf.
 
 import os
 from pathlib import Path
-from fastapi import APIRouter, Request, Form, HTTPException
+from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
@@ -21,6 +21,7 @@ from lenny.core.catalog import get_catalog, get_book, update_book
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 TEMPLATES_DIR = BASE_DIR / "lenny" / "templates"
 BOOKS_DIR = BASE_DIR / "books"
+COVERS_DIR = BASE_DIR / "covers"
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -244,16 +245,31 @@ async def admin_update_book(
     publisher: str = Form(""),
     year: str = Form(""),
     description: str = Form(""),
-    cover: str = Form(""),
+    cover_file: UploadFile | None = File(None),
 ):
-    """Save metadata edits back to catalog.json."""
+    """Save metadata edits and optional cover image upload."""
+    # Determine cover filename — upload new file or keep existing
+    cover_filename = ""
+    if cover_file and cover_file.filename and cover_file.size:
+        # Sanitize: use book_id + original extension
+        ext = Path(cover_file.filename).suffix.lower() or ".jpg"
+        cover_filename = f"{book_id}{ext}"
+        COVERS_DIR.mkdir(exist_ok=True)
+        dest = COVERS_DIR / cover_filename
+        dest.write_bytes(await cover_file.read())
+    else:
+        # Keep existing cover value
+        existing = get_book(book_id)
+        if existing:
+            cover_filename = existing.get("cover", "")
+
     update_book(book_id, {
         "title": title,
         "author": author,
         "publisher": publisher,
         "year": year,
         "description": description,
-        "cover": cover,
+        "cover": cover_filename,
     })
     return RedirectResponse(url="/admin?saved=1", status_code=303)
 

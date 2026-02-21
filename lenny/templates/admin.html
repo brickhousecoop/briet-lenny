@@ -15,15 +15,9 @@
     {% endif %}
 
     {% for book in books %}
-    <form method="POST" action="/admin/catalog/{{ book.id }}" class="admin-form">
+    <form method="POST" action="/admin/catalog/{{ book.id }}" class="admin-form" enctype="multipart/form-data">
         <div class="admin-card">
             <h2>{{ book.title or "Untitled" }}</h2>
-
-            {% if book.cover %}
-            <div style="margin-bottom:1rem">
-                <img src="/covers/{{ book.cover }}" alt="Cover" style="max-height:180px;border-radius:var(--radius);border:1px solid var(--color-border)">
-            </div>
-            {% endif %}
 
             <div class="form-row">
                 <div class="form-group">
@@ -54,8 +48,18 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="cover-{{ book.id }}">Cover filename (in covers/)</label>
-                    <input type="text" id="cover-{{ book.id }}" name="cover" value="{{ book.get('cover', '') }}" placeholder="e.g. cooking-cover.jpg">
+                    <label>Cover Image</label>
+                    {% if book.cover %}
+                    <div class="cover-preview">
+                        <img src="/covers/{{ book.cover }}" alt="Current cover">
+                        <span class="cover-filename">{{ book.cover }}</span>
+                    </div>
+                    {% endif %}
+                    <label for="cover_file-{{ book.id }}" class="file-upload-label">
+                        <span class="file-upload-btn btn btn-outline btn-small">{{ "Replace image…" if book.cover else "Upload JPG…" }}</span>
+                        <input type="file" id="cover_file-{{ book.id }}" name="cover_file" accept="image/jpeg,image/png,image/webp" class="file-upload-input">
+                    </label>
+                    <span class="file-upload-name" id="filename-{{ book.id }}"></span>
                 </div>
                 <div class="form-group">
                     <label for="format-{{ book.id }}">Format</label>
@@ -63,9 +67,20 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save Metadata</button>
+            <button type="submit" class="btn btn-primary">Save</button>
         </div>
     </form>
     {% endfor %}
 </section>
+
+<script>
+document.querySelectorAll('.file-upload-input').forEach(input => {
+    input.addEventListener('change', () => {
+        const nameEl = input.closest('.form-group').querySelector('.file-upload-name');
+        if (nameEl && input.files.length) {
+            nameEl.textContent = input.files[0].name;
+        }
+    });
+});
+</script>
 {% endblock %}
