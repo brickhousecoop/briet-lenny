@@ -4,11 +4,15 @@ A Free, Open Source Lending System for Libraries.
 This is a self-contained demo adapted for Vercel deployment.
 """
 
+import logging
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from lenny.core.blob import BLOB_ENABLED
 from lenny.routes.views import router
+
+logger = logging.getLogger(__name__)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,3 +38,11 @@ if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 app.include_router(router)
+
+if BLOB_ENABLED:
+    logger.info("Vercel Blob storage is ENABLED — catalog changes will persist across deploys.")
+else:
+    logger.warning(
+        "Vercel Blob storage is NOT configured (BLOB_READ_WRITE_TOKEN missing). "
+        "Catalog changes will be lost on cold starts."
+    )

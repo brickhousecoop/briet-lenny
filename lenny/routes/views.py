@@ -17,6 +17,7 @@ from lenny.core.auth import (
     SESSION_COOKIE,
 )
 from lenny.core.catalog import get_catalog, get_book, update_book
+from lenny.core.blob import BLOB_ENABLED
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 TEMPLATES_DIR = BASE_DIR / "lenny" / "templates"
@@ -238,6 +239,7 @@ async def admin_page(request: Request, saved: bool = False):
         "session": session,
         "books": books,
         "saved": saved,
+        "blob_enabled": BLOB_ENABLED,
     })
 
 
