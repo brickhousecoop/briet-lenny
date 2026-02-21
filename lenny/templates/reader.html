@@ -16,16 +16,164 @@
         </div>
     </div>
 
-    <div class="reader-container">
-        <embed
-            src="/books/{{ book.id }}/download#toolbar=0&navpanes=0"
-            type="application/pdf"
-            width="100%"
-            height="100%"
-        >
-        <noscript>
-            <p>Your browser does not support embedded PDFs.</p>
-        </noscript>
+    {# ── PDF.js viewer controls ── #}
+    <div class="pdf-controls">
+        <div class="pdf-nav">
+            <button id="prev-page" class="pdf-btn" title="Previous page (←)">&#9664;</button>
+            <span class="page-indicator">
+                <input id="page-num" type="number" min="1" value="1">
+                <span>/</span>
+                <span id="page-count">&ndash;</span>
+            </span>
+            <button id="next-page" class="pdf-btn" title="Next page (→)">&#9654;</button>
+        </div>
+        <div class="pdf-zoom">
+            <button id="zoom-out" class="pdf-btn" title="Zoom out (−)">&#8722;</button>
+            <span id="zoom-level">Fit</span>
+            <button id="zoom-in" class="pdf-btn" title="Zoom in (+)">&#43;</button>
+            <button id="zoom-fit" class="pdf-btn pdf-btn-text" title="Fit to width">Fit width</button>
+        </div>
+    </div>
+
+    <div class="reader-container" id="pdf-container">
+        <div id="pdf-loading" class="pdf-loading">Loading&hellip;</div>
+        <canvas id="pdf-canvas"></canvas>
     </div>
 </section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+/* global pdfjsLib */
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+(function () {
+    var url       = '/books/{{ book.id }}/download';
+    var canvas    = document.getElementById('pdf-canvas');
+    var ctx       = canvas.getContext('2d');
+    var container = document.getElementById('pdf-container');
+    var loading   = document.getElementById('pdf-loading');
+    var pageInput = document.getElementById('page-num');
+    var countEl   = document.getElementById('page-count');
+    var zoomEl    = document.getElementById('zoom-level');
+
+    var pdfDoc      = null;
+    var currentPage = 1;
+    var rendering   = false;
+    var pending     = null;
+    var userScale   = null;   // null ⇒ fit-to-width
+
+    var ZOOM_STEP = 0.25;
+    var MIN_SCALE = 0.5;
+    var MAX_SCALE = 4.0;
+
+    /* ── Render a single page ── */
+    function renderPage(num) {
+        if (rendering) { pending = num; return; }
+        rendering = true;
+
+        pdfDoc.getPage(num).then(function (page) {
+            var scale = userScale;
+            if (scale === null) {
+                var raw = page.getViewport({ scale: 1 });
+                scale = (container.clientWidth - 4) / raw.width;
+            }
+
+            var viewport = page.getViewport({ scale: scale });
+            canvas.width  = viewport.width;
+            canvas.height = viewport.height;
+
+            page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function () {
+                rendering = false;
+                currentPage = num;
+                pageInput.value = num;
+                zoomEl.textContent = userScale === null
+                    ? 'Fit'
+                    : Math.round(scale * 100) + '%';
+
+                if (pending !== null) {
+                    var p = pending;
+                    pending = null;
+                    renderPage(p);
+                }
+            });
+        });
+    }
+
+    /* ── Resolve effective scale (async because getPage is a promise) ── */
+    function withEffectiveScale(cb) {
+        if (userScale !== null) { cb(userScale); return; }
+        pdfDoc.getPage(currentPage).then(function (page) {
+            var raw = page.getViewport({ scale: 1 });
+            cb((container.clientWidth - 4) / raw.width);
+        });
+    }
+
+    /* ── Navigation ── */
+    document.getElementById('prev-page').addEventListener('click', function () {
+        if (currentPage > 1) renderPage(currentPage - 1);
+    });
+    document.getElementById('next-page').addEventListener('click', function () {
+        if (pdfDoc && currentPage < pdfDoc.numPages) renderPage(currentPage + 1);
+    });
+    pageInput.addEventListener('change', function () {
+        var n = parseInt(pageInput.value, 10);
+        if (pdfDoc && n >= 1 && n <= pdfDoc.numPages) {
+            renderPage(n);
+        } else {
+            pageInput.value = currentPage;
+        }
+    });
+
+    /* ── Zoom ── */
+    document.getElementById('zoom-in').addEventListener('click', function () {
+        withEffectiveScale(function (s) {
+            userScale = Math.min(s + ZOOM_STEP, MAX_SCALE);
+            renderPage(currentPage);
+        });
+    });
+    document.getElementById('zoom-out').addEventListener('click', function () {
+        withEffectiveScale(function (s) {
+            userScale = Math.max(s - ZOOM_STEP, MIN_SCALE);
+            renderPage(currentPage);
+        });
+    });
+    document.getElementById('zoom-fit').addEventListener('click', function () {
+        userScale = null;
+        renderPage(currentPage);
+    });
+
+    /* ── Keyboard shortcuts ── */
+    document.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'INPUT') return;
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (currentPage > 1) renderPage(currentPage - 1);
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (pdfDoc && currentPage < pdfDoc.numPages) renderPage(currentPage + 1);
+        }
+    });
+
+    /* ── Resize ── */
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+            if (userScale === null) renderPage(currentPage);
+        }, 200);
+    });
+
+    /* ── Load the PDF ── */
+    pdfjsLib.getDocument(url).promise.then(function (pdf) {
+        pdfDoc = pdf;
+        countEl.textContent  = pdf.numPages;
+        pageInput.max        = pdf.numPages;
+        loading.style.display = 'none';
+        renderPage(1);
+    }).catch(function () {
+        loading.textContent = 'Unable to load PDF.';
+    });
+})();
+</script>
 {% endblock %}

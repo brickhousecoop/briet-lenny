@@ -393,14 +393,74 @@ footer a { color: var(--color-primary-light); }
     flex: 1;
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
-    overflow: hidden;
+    overflow: auto;
     min-height: 400px;
+    background: #525659;
+    text-align: center;
 }
-.reader-container embed {
+.reader-container canvas {
     display: block;
-    width: 100%;
-    height: 100%;
-    min-height: 400px;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+/* PDF loading message */
+.pdf-loading {
+    padding: 3rem;
+    color: #ccc;
+    font-size: 1.1rem;
+}
+
+/* --- PDF viewer controls --- */
+.pdf-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.4rem 0.75rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+.pdf-nav, .pdf-zoom {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.pdf-btn {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--color-text);
+}
+.pdf-btn:hover { background: var(--color-border); }
+.pdf-btn-text { font-size: 0.85rem; padding: 0.3rem 0.6rem; }
+.page-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+.page-indicator input {
+    width: 3.5rem;
+    text-align: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 0.2rem;
+    font-size: 0.9rem;
+}
+#zoom-level {
+    font-size: 0.85rem;
+    min-width: 2.5rem;
+    text-align: center;
+    color: var(--color-text-muted);
 }
 
 /* --- Book metadata line --- */
