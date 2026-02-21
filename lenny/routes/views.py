@@ -7,7 +7,7 @@ borrowing/returning, PDF reading, and user bookshelf.
 import os
 from pathlib import Path
 from fastapi import APIRouter, Request, Form, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
 from lenny.core.auth import (
@@ -211,10 +211,11 @@ async def download_book(request: Request, book_id: str):
             detail="Book file not yet uploaded. Add a PDF to the books/ directory.",
         )
 
-    return FileResponse(
-        path=str(file_path),
+    data = file_path.read_bytes()
+    return Response(
+        content=data,
         media_type="application/pdf",
-        filename=book["filename"],
+        headers={"Content-Disposition": "inline"},
     )
 
 
