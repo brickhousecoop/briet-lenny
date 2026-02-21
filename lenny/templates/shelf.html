@@ -12,12 +12,25 @@
     <div class="book-grid">
         {% for book in books %}
         <div class="book-card">
-            <div class="book-cover">
+            <div class="book-cover{% if book.cover %} book-cover--img{% endif %}">
+                {% if book.cover %}
+                <img src="/covers/{{ book.cover }}" alt="{{ book.title }} cover">
+                {% endif %}
                 <span class="format-badge">{{ book.format }}</span>
             </div>
             <div class="book-info">
                 <h3>{{ book.title }}</h3>
                 <p class="book-author">{{ book.author }}</p>
+                {% if book.get('publisher') or book.get('year') %}
+                <p class="book-meta">
+                    {% if book.get('publisher') %}{{ book.publisher }}{% endif %}
+                    {% if book.get('publisher') and book.get('year') %} &middot; {% endif %}
+                    {% if book.get('year') %}{{ book.year }}{% endif %}
+                </p>
+                {% endif %}
+                {% if book.description %}
+                <p class="book-description">{{ book.description }}</p>
+                {% endif %}
                 <div class="book-actions">
                     <a href="/catalog/{{ book.id }}/read" class="btn btn-primary">
                         Read

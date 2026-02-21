@@ -16,7 +16,7 @@ from lenny.core.auth import (
     update_borrowed,
     SESSION_COOKIE,
 )
-from lenny.core.catalog import get_catalog, get_book
+from lenny.core.catalog import get_catalog, get_book, update_book
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 TEMPLATES_DIR = BASE_DIR / "lenny" / "templates"
@@ -217,6 +217,45 @@ async def download_book(request: Request, book_id: str):
         media_type="application/pdf",
         headers={"Content-Disposition": "inline"},
     )
+
+
+# ---------------------------------------------------------------------------
+# Admin — catalog metadata editor
+# ---------------------------------------------------------------------------
+
+@router.get("/admin", response_class=HTMLResponse)
+async def admin_page(request: Request, saved: bool = False):
+    books = get_catalog()
+    session = get_session(request)
+    return templates.TemplateResponse("admin.html", {
+        "request": request,
+        "session": session,
+        "books": books,
+        "saved": saved,
+    })
+
+
+@router.post("/admin/catalog/{book_id}")
+async def admin_update_book(
+    request: Request,
+    book_id: str,
+    title: str = Form(""),
+    author: str = Form(""),
+    publisher: str = Form(""),
+    year: str = Form(""),
+    description: str = Form(""),
+    cover: str = Form(""),
+):
+    """Save metadata edits back to catalog.json."""
+    update_book(book_id, {
+        "title": title,
+        "author": author,
+        "publisher": publisher,
+        "year": year,
+        "description": description,
+        "cover": cover,
+    })
+    return RedirectResponse(url="/admin?saved=1", status_code=303)
 
 
 # ---------------------------------------------------------------------------
