@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BRIET Digital Lending{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo">BRIET <span>Digital Lending</span></a>
+            <div class="nav-links">
+                {% if session %}
+                    <a href="/catalog">Catalog</a>
+                    <a href="/shelf">My Shelf</a>
+                    <a href="/admin">Admin</a>
+                    <a href="/logout" class="btn btn-small btn-outline">Logout</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>
+            Powered by <a href="https://github.com/ArchiveLabs/lenny" target="_blank" rel="noopener">Lenny</a>
+            — The Open Source Library-in-a-Box
+        </p>
+    </footer>
+</body>
+</html>

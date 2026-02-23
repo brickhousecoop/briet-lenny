@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Catalog — BRIET Digital Lending{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <h1>Catalog</h1>
+    <p class="page-description">
+        Browse available titles. Borrow a book to read it in your browser.
+    </p>
+
+    {% if books %}
+    <div class="book-grid">
+        {% for book in books %}
+        <div class="book-card">
+            <div class="book-cover{% if book.cover_data %} book-cover--img{% endif %}">
+                {% if book.cover_data %}
+                <img src="/covers/{{ book.id }}" alt="{{ book.title }} cover">
+                {% endif %}
+                <span class="format-badge">{{ book.format }}</span>
+            </div>
+            <div class="book-info">
+                <h3>{{ book.title }}</h3>
+                <p class="book-author">{{ book.author }}</p>
+                {% if book.get('publisher') or book.get('year') %}
+                <p class="book-meta">
+                    {% if book.get('publisher') %}{{ book.publisher }}{% endif %}
+                    {% if book.get('publisher') and book.get('year') %} &middot; {% endif %}
+                    {% if book.get('year') %}{{ book.year }}{% endif %}
+                </p>
+                {% endif %}
+                <p class="book-description">{{ book.description }}</p>
+                <p class="book-availability">
+                    {{ book.total_copies }} copies available
+                </p>
+
+                {% if book.id in borrowed_ids %}
+                    <div class="book-actions">
+                        <a href="/catalog/{{ book.id }}/read" class="btn btn-primary">
+                            Read
+                        </a>
+                        <form method="POST" action="/catalog/{{ book.id }}/return" style="display:inline">
+                            <button type="submit" class="btn btn-outline">Return</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <form method="POST" action="/catalog/{{ book.id }}/borrow">
+                        <button type="submit" class="btn btn-primary">Borrow</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No books available in the catalog yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

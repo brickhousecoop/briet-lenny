@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Admin — BRIET Digital Lending{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <h1>Catalog Admin</h1>
+    <p class="page-description">
+        Edit book metadata below. Changes are saved to catalog.json.
+    </p>
+
+    {% if not blob_enabled %}
+    <div class="info-box" style="background:#FFFBEB;border-color:#F59E0B;margin-bottom:1.5rem">
+        <p style="color:#92400E"><strong>Persistent storage is not configured.</strong>
+        Cover images and metadata changes will be lost on the next deploy or cold start.</p>
+        <p style="color:#92400E;margin-top:0.5rem;font-size:0.9rem">
+            To fix this: open your Vercel dashboard &rarr; select this project &rarr;
+            <strong>Storage</strong> tab &rarr; <strong>Create Database</strong> &rarr;
+            choose <strong>Blob</strong> &rarr; connect it to the project.
+            This auto-injects <code>BLOB_READ_WRITE_TOKEN</code>. Then redeploy.
+        </p>
+    </div>
+    {% endif %}
+
+    {% if saved %}
+    <div class="info-box" style="background:#ECFDF5;border-color:#6EE7B7;margin-bottom:1.5rem">
+        <p style="color:#065F46">Metadata saved successfully.</p>
+    </div>
+    {% endif %}
+
+    {% for book in books %}
+    <form method="POST" action="/admin/catalog/{{ book.id }}" class="admin-form" enctype="multipart/form-data">
+        <div class="admin-card">
+            <h2>{{ book.title or "Untitled" }}</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="title-{{ book.id }}">Title</label>
+                    <input type="text" id="title-{{ book.id }}" name="title" value="{{ book.title }}">
+                </div>
+                <div class="form-group">
+                    <label for="author-{{ book.id }}">Author</label>
+                    <input type="text" id="author-{{ book.id }}" name="author" value="{{ book.author }}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="publisher-{{ book.id }}">Publisher</label>
+                    <input type="text" id="publisher-{{ book.id }}" name="publisher" value="{{ book.get('publisher', '') }}">
+                </div>
+                <div class="form-group">
+                    <label for="year-{{ book.id }}">Year</label>
+                    <input type="text" id="year-{{ book.id }}" name="year" value="{{ book.get('year', '') }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description-{{ book.id }}">Description</label>
+                <textarea id="description-{{ book.id }}" name="description" rows="3">{{ book.description }}</textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cover Image</label>
+                    {% if book.cover_data %}
+                    <div class="cover-preview">
+                        <img src="/covers/{{ book.id }}" alt="Current cover">
+                    </div>
+                    {% endif %}
+                    <label for="cover_file-{{ book.id }}" class="file-upload-label">
+                        <span class="file-upload-btn btn btn-outline btn-small">{{ "Replace image…" if book.cover_data else "Upload JPG…" }}</span>
+                        <input type="file" id="cover_file-{{ book.id }}" name="cover_file" accept="image/jpeg,image/png,image/webp" class="file-upload-input">
+                    </label>
+                    <span class="file-upload-name" id="filename-{{ book.id }}"></span>
+                </div>
+                <div class="form-group">
+                    <label for="format-{{ book.id }}">Format</label>
+                    <input type="text" id="format-{{ book.id }}" name="format" value="{{ book.format }}" readonly>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </form>
+    {% endfor %}
+</section>
+
+<script>
+document.querySelectorAll('.file-upload-input').forEach(input => {
+    input.addEventListener('change', () => {
+        const nameEl = input.closest('.form-group').querySelector('.file-upload-name');
+        if (nameEl && input.files.length) {
+            nameEl.textContent = input.files[0].name;
+        }
+    });
+});
+</script>
+{% endblock %}
