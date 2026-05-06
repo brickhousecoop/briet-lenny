@@ -1,5 +1,5 @@
 > [!CAUTION]
-> This repo is entirely a hallucinated implementation of Lenny, courtest of @davidmooreppf's Claude. It's fun! But not real. BRIET's actual fork of Lenny is at https://github.com/brickhousecoop/lenny, and deployed to lender.briet.app.
+> This repo is entirely a hallucinated implementation of Lenny, courtest of @davidmooreppf's Claude. It's fun! But not real. BRIET's actual fork of Lenny is at [brickhousecoop/lenny](https://github.com/brickhousecoop/lenny), and deployed to [lender.briet.app](https://lender.briet.app/).
 
 # BRIET Digital Lending
 
