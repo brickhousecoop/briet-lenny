@@ -1,3 +1,6 @@
+> [!CAUTION]
+> This repo is entirely a hallucinated implementation of Lenny, courtest of @davidmooreppf's Claude. It's fun! But not real. BRIET's actual fork of Lenny is at https://github.com/brickhousecoop/lenny, and deployed to lender.briet.app.
+
 # BRIET Digital Lending
 
 A demonstration deployment of [Lenny](https://github.com/ArchiveLabs/lenny) — the open source Library-in-a-Box — adapted for Vercel.
